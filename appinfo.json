@@ -1,0 +1,29 @@
+{
+    "appKeys": {},
+    "capabilities": [
+        ""
+    ],
+    "companyName": "matsumo",
+    "longName": "My TicToc",
+    "projectType": "native",
+    "resources": {
+        "media": [
+            {
+                "file": "images/TicTocTac_28x28.png",
+                "menuIcon": true,
+                "name": "TicTacTox_28x28",
+                "type": "png"
+            }
+        ]
+    },
+    "sdkVersion": "3",
+    "shortName": "My TicToc",
+    "targetPlatforms": [
+        "basalt"
+    ],
+    "uuid": "c14db83c-4128-4a84-ba06-814a48a08322",
+    "versionLabel": "1.0",
+    "watchapp": {
+        "watchface": true
+    }
+}
