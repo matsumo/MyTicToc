@@ -25,7 +25,6 @@ static GPoint s_center, s_center_top;
 static Time s_last_time, s_anim_time;
 static bool s_animating = false;
 static int s_radius = 0, s_color_channels[3];
-static char s_num_buffer[4];
 
 static bool s_show_hour_markers = false;
 
@@ -164,12 +163,11 @@ static void update_proc(Layer *layer, GContext *ctx) {
 	}
 }
 
-static void date_update_proc(Layer *layer, GContext *ctx) {
-    time_t now = time(NULL);
-    struct tm *t = localtime(&now);
-
-    strftime(s_num_buffer, sizeof(s_num_buffer), "%d", t);
-    text_layer_set_text(s_num_label, s_num_buffer);
+static void battery_handler(BatteryChargeState new_state) {
+    // Write to buffer and display
+    static char s_battery_buffer[6];
+    snprintf(s_battery_buffer, sizeof(s_battery_buffer), "%d%%", new_state.charge_percent);
+    text_layer_set_text(s_num_label, s_battery_buffer);
 }
 
 static void window_load(Window *window) {
@@ -188,19 +186,20 @@ static void window_load(Window *window) {
     
     //Date layer
     s_date_layer = layer_create(window_bounds);
-    layer_set_update_proc(s_date_layer, date_update_proc);
     layer_add_child(window_layer, s_date_layer);
     
     int date_text_height = 20;
     
     s_num_label = text_layer_create(GRect(0, window_bounds.size.h - date_text_height, window_bounds.size.w, date_text_height));
-    text_layer_set_text(s_num_label, s_num_buffer);
     text_layer_set_text_alignment(s_num_label, GTextAlignmentCenter);
     text_layer_set_background_color(s_num_label, GColorClear);
     text_layer_set_text_color(s_num_label, GColorWhite);
     text_layer_set_font(s_num_label, fonts_get_system_font(FONT_KEY_GOTHIC_14));
     
     layer_add_child(window_layer, text_layer_get_layer(s_num_label));
+
+    // Get the current battery level
+    battery_handler(battery_state_service_peek());
 }
 
 static void window_unload(Window *window) {
@@ -254,6 +253,9 @@ static void init() {
         .update = hands_update
     };
     animate(2 * ANIMATION_DURATION, ANIMATION_DELAY, &hands_impl, true);
+
+    // Subscribe to the Battery State Service
+    battery_state_service_subscribe(battery_handler);
 }
 
 static void deinit() {
